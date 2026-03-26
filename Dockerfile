@@ -9,7 +9,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN npm install -g @anthropic-ai/claude-code
 
 # Install LiteLLM (Anthropic-to-OpenAI proxy)
-RUN pip3 install 'litellm[proxy]' --break-system-packages
+# PINNED to 1.82.6 — versions 1.82.7 and 1.82.8 were compromised in a supply chain attack (March 2026)
+RUN pip3 install 'litellm[proxy]==1.82.6' --break-system-packages
 
 # Create sandboxed workspace with memory persistence
 RUN useradd -m -s /bin/bash nemo
