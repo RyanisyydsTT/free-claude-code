@@ -304,7 +304,51 @@ YAML
 lsof -ti:4000 2>/dev/null | xargs kill 2>/dev/null
 sleep 1
 
-litellm --config /tmp/nemo-litellm.yaml --port 4000 --host 127.0.0.1 > /tmp/nemo-litellm.log 2>&1 &
+# Find litellm — might not be on PATH (especially Windows)
+LITELLM_CMD=""
+if command -v litellm &> /dev/null; then
+    LITELLM_CMD="litellm"
+else
+    # Search common Python script locations
+    for CANDIDATE in \
+        "$HOME/AppData/Local/Packages/PythonSoftwareFoundation.Python."*/LocalCache/local-packages/Python*/Scripts/litellm.exe \
+        "$HOME/AppData/Local/Programs/Python/Python"*/Scripts/litellm.exe \
+        "$HOME/.local/bin/litellm" \
+        /usr/local/bin/litellm; do
+        if [ -f "$CANDIDATE" ]; then
+            LITELLM_CMD="$CANDIDATE"
+            break
+        fi
+    done
+fi
+
+if [ -z "$LITELLM_CMD" ]; then
+    echo "LiteLLM not found. Installing..."
+    PYTHON_CMD=$(command -v python3 || command -v python)
+    $PYTHON_CMD -m pip install 'litellm[proxy]==1.82.6' --quiet 2>&1 | tail -1
+    # Try again after install
+    if command -v litellm &> /dev/null; then
+        LITELLM_CMD="litellm"
+    else
+        for CANDIDATE in \
+            "$HOME/AppData/Local/Packages/PythonSoftwareFoundation.Python."*/LocalCache/local-packages/Python*/Scripts/litellm.exe \
+            "$HOME/AppData/Local/Programs/Python/Python"*/Scripts/litellm.exe \
+            "$HOME/.local/bin/litellm" \
+            /usr/local/bin/litellm; do
+            if [ -f "$CANDIDATE" ]; then
+                LITELLM_CMD="$CANDIDATE"
+                break
+            fi
+        done
+    fi
+fi
+
+if [ -z "$LITELLM_CMD" ]; then
+    echo "ERROR: Could not find litellm after install. Add Python Scripts to your PATH."
+    exit 1
+fi
+
+"$LITELLM_CMD" --config /tmp/nemo-litellm.yaml --port 4000 --host 127.0.0.1 > /tmp/nemo-litellm.log 2>&1 &
 PROXY_PID=$!
 trap "kill $PROXY_PID 2>/dev/null" EXIT
 
