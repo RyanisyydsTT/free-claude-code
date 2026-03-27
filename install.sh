@@ -175,15 +175,13 @@ if [ "${INSTALL_MODE:-1}" = "1" ]; then
     SCRIPT_DIR="$(cd "$(dirname "$0")" 2>/dev/null && pwd)"
     if [ -f "$SCRIPT_DIR/Dockerfile" ]; then
         cd "$SCRIPT_DIR"
-        docker build -t nemo-code:latest . 2>&1 | grep -E "^(#|Successfully|DONE)" | tail -5
-    elif docker pull ghcr.io/clawdworks/nemo-code:latest 2>/dev/null; then
-        docker tag ghcr.io/clawdworks/nemo-code:latest nemo-code:latest
     else
-        echo -e "  ${RED}Can't find Dockerfile or pull image.${RESET}"
-        echo -e "  Clone the repo: ${CYAN}git clone https://github.com/clawdworks/nemo-code && cd nemo-code${RESET}"
-        echo -e "  Then re-run: ${CYAN}bash install.sh${RESET}"
-        exit 1
+        echo -e "  ${DIM}Downloading Nemo Code source...${RESET}"
+        CLONE_DIR=$(mktemp -d)
+        git clone --depth 1 https://github.com/kevdogg102396-afk/nemo-code.git "$CLONE_DIR" 2>&1 | tail -1
+        cd "$CLONE_DIR"
     fi
+    docker build -t nemo-code:latest . 2>&1 | grep -E "^(#|Successfully|DONE)" | tail -5
     echo -e "  ${GREEN}✓${RESET} Docker image ready"
 
     # Docker launcher
