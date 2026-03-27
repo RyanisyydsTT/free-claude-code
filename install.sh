@@ -440,6 +440,12 @@ LOCALLAUNCHER
     # Save env
     echo "export NVIDIA_API_KEY=\"${NVIDIA_API_KEY}\"" > "$NEMO_DIR/.env"
     echo "export NEMO_MODEL=\"${NEMO_MODEL}\"" >> "$NEMO_DIR/.env"
+
+    # Copy PowerShell launcher for Windows users
+    SCRIPT_DIR_PS="$(cd "$(dirname "$0")" 2>/dev/null && pwd)"
+    if [ -f "$SCRIPT_DIR_PS/src/nemo-code.ps1" ]; then
+        cp "$SCRIPT_DIR_PS/src/nemo-code.ps1" "$NEMO_DIR/nemo-code.ps1"
+    fi
 fi
 
 # ─── Add to PATH (Linux/Mac + Windows) ───────────────────────────────
@@ -483,10 +489,10 @@ if [ -n "$MSYSTEM" ] || [ -d "/c/Users" ] || [ -d "/mnt/c/Users" ]; then
 wsl -e bash -lc "clawdworks %*"
 WSLCMD
         else
-            # Native Windows: .cmd calls bash directly
+            # Native Windows: .cmd calls PowerShell launcher (no bash needed)
             cat > "${WIN_BIN}/clawdworks.cmd" << 'WINCMD'
 @echo off
-bash "%USERPROFILE%\.nemo-code\nemo-code" %*
+powershell -NoProfile -ExecutionPolicy Bypass -File "%USERPROFILE%\.nemo-code\nemo-code.ps1" %*
 WINCMD
         fi
 
@@ -501,6 +507,7 @@ WSLTG
 @echo off
 bash "%USERPROFILE%\.nemo-code\nemo-telegram" %*
 WINTG
+
             fi
         fi
 
