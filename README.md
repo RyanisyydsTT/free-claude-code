@@ -163,7 +163,7 @@ Nemo Code is provided as-is, without warranty of any kind. Use at your own risk.
 - **[Claude Code CLI](https://github.com/anthropics/claude-code)** by Anthropic (Apache 2.0)
 - **[LiteLLM](https://github.com/BerriAI/litellm)** by BerriAI (MIT)
 - **[NVIDIA NIM](https://build.nvidia.com)** free inference endpoints
-- **ClawdWorks** — Kevin Clawson + Claude
+- **ClawdWorks** — Kevin Cline + Claude
 
 ---
 
