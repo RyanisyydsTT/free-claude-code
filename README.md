@@ -2,6 +2,8 @@
 
 **Free AI coding agent. Zero cost. One command.**
 
+> **🔥 Update (March 27, 2026):** Mid-session model switching is here! Type `/model` in the TUI to switch between Kimi K2.5, Qwen 3.5 397B, and MiniMax M2.5 — no restart needed. If you installed before this update, just re-run the installer to get the new version.
+
 Nemo Code gives you the full Claude Code CLI experience — tools, file editing, bash, MCP servers, autocompact — powered by NVIDIA's best open models instead of a $200/mo subscription.
 
 Built on the [Claude Code CLI](https://github.com/anthropics/claude-code) (Apache 2.0) + [LiteLLM](https://github.com/BerriAI/litellm) + [NVIDIA NIM](https://build.nvidia.com) free tier.
