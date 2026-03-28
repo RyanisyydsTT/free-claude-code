@@ -101,17 +101,17 @@ litellm_settings:
 model_list:
   - model_name: claude-sonnet-4-6
     litellm_params:
-      model: nvidia_nim/$NemoModel
+      model: nvidia_nim/moonshotai/kimi-k2.5
       api_key: $env:NVIDIA_API_KEY
       max_tokens: $MaxTokens
   - model_name: claude-opus-4-6
     litellm_params:
-      model: nvidia_nim/$NemoModel
+      model: nvidia_nim/qwen/qwen3.5-397b-a17b
       api_key: $env:NVIDIA_API_KEY
       max_tokens: $MaxTokens
   - model_name: claude-haiku-4-5-20251001
     litellm_params:
-      model: nvidia_nim/$NemoModel
+      model: nvidia_nim/minimaxai/minimax-m2.5
       api_key: $env:NVIDIA_API_KEY
       max_tokens: $MaxTokens
 "@
@@ -181,36 +181,37 @@ $claudeJson = @'
   "hasCompletedOnboarding": true,
   "theme": "dark",
   "customApiKeyResponses": { "approved": true },
-  "bypassPermissionsModeAccepted": true
 }
 '@
 [IO.File]::WriteAllText("$configDir\.claude.json", $claudeJson, $Utf8NoBom)
 
-# Write model-aware identity (no BOM)
-$identity = @"
+# Write identity (no BOM)
+$identity = @'
 # Nemo Code Agent
+You are **Nemo** — a free AI coding agent running inside Nemo Code (by ClawdWorks).
+You are NOT Claude. You are Nemo. You run on NVIDIA's free NIM API. You cost $0 — completely free.
 
-You are **Nemo** - a free AI coding agent powered by $FriendlyModel, running inside Nemo Code (by ClawdWorks).
+## Your Models (switch mid-session with /model)
+- **Sonnet** = Kimi K2.5 (Moonshot AI) — top coding model, default
+- **Opus** = Qwen 3.5 397B (Alibaba) — biggest brain, massive MoE
+- **Haiku** = MiniMax M2.5 — fastest responses
 
-You are NOT Claude. You are Nemo. You run on the Claude Code CLI framework, but your brain is $FriendlyModel via NVIDIA's free NIM API. You cost `$0 to run - completely free, no subscription, no credit card, no catch.
+All three are free via NVIDIA NIM. Users can type /model in the TUI to switch anytime.
 
-## When someone asks "how much do you cost?" or "are you free?"
-Say something like: "I'm 100% free. I run $FriendlyModel through NVIDIA's free API tier. No subscription, no credit card, no hidden fees. Just a free NVIDIA API key from build.nvidia.com and you're rolling."
+## When asked "how much do you cost?" or "are you free?"
+Say: "I'm 100% free. All 3 models run through NVIDIA's free API tier. No subscription, no credit card. Type /model to switch between Kimi K2.5, Qwen 3.5, and MiniMax M2.5."
 
 ## Key Facts
-- **Model**: $FriendlyModel (via NVIDIA NIM free tier)
-- **Cost**: `$0. Free. Always.
-- **Framework**: Claude Code CLI (Apache 2.0 open source)
-- **Proxy**: LiteLLM routes requests to NVIDIA instead of Anthropic
+- **Cost**: $0. Free. Always. All models.
 - **Made by**: ClawdWorks (Kevin Clawson + Claude)
 - **Open source**: github.com/kevdogg102396-afk/nemo-code
+- **Framework**: Claude Code CLI (Apache 2.0)
 
 ## Rules
 - Be direct, casual, no corporate tone
-- If you don't know something, say so - never make stuff up
+- If you don't know something, say so — never make stuff up
 - You ARE Nemo, not Claude. Own it.
-- You have full access to this machine's filesystem and tools
-"@
+'@
 [IO.File]::WriteAllText("$NemoDir\CLAUDE.md", $identity, $Utf8NoBom)
 
 # Branding
@@ -219,7 +220,7 @@ Write-Host "  CLAWD WORKS" -ForegroundColor Yellow -NoNewline
 Write-Host " | " -NoNewline
 Write-Host "nemo-code" -ForegroundColor Cyan -NoNewline
 Write-Host " | " -NoNewline
-Write-Host $FriendlyModel -ForegroundColor Cyan
+Write-Host "Kimi K2.5 | Qwen 3.5 | MiniMax M2.5" -ForegroundColor Cyan
 Write-Host ""
 
 # CC's interactive TUI needs winpty on Windows (comes with Git for Windows)
@@ -227,10 +228,10 @@ $winpty = "C:\Program Files\Git\usr\bin\winpty.exe"
 
 if ((Test-Path $winpty) -and -not ($args -contains "--print")) {
     # winpty gives claude a proper PTY for its TUI
-    & $winpty claude --model sonnet --dangerously-skip-permissions --system-prompt-file "$NemoDir\CLAUDE.md" @args
+    & $winpty claude --model sonnet --system-prompt-file "$NemoDir\CLAUDE.md" @args
 } else {
     # --print mode works without winpty, or winpty not installed
-    & claude --model sonnet --dangerously-skip-permissions --system-prompt-file "$NemoDir\CLAUDE.md" @args
+    & claude --model sonnet --system-prompt-file "$NemoDir\CLAUDE.md" @args
 }
 
 # Kill proxy on exit if we started it

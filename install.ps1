@@ -157,7 +157,7 @@ $envContent = "export NVIDIA_API_KEY=`"$NvidiaKey`"`nexport NEMO_MODEL=`"$NemoMo
 [IO.File]::WriteAllText("$NemoDir\.env", $envContent, $Utf8NoBom)
 
 # Pre-bake onboarding
-$claudeJson = '{"hasCompletedOnboarding":true,"theme":"dark","customApiKeyResponses":{"approved":true},"bypassPermissionsModeAccepted":true}'
+$claudeJson = '{"hasCompletedOnboarding":true,"theme":"dark","customApiKeyResponses":{"approved":true}}'
 [IO.File]::WriteAllText("$NemoDir\.claude-config\.claude.json", $claudeJson, $Utf8NoBom)
 
 # Copy PowerShell launcher
@@ -193,17 +193,17 @@ litellm_settings:
 model_list:
   - model_name: claude-sonnet-4-6
     litellm_params:
-      model: nvidia_nim/${NEMO_MODEL}
+      model: nvidia_nim/moonshotai/kimi-k2.5
       api_key: ${NVIDIA_API_KEY}
       max_tokens: ${NEMO_MAX_TOKENS}
   - model_name: claude-opus-4-6
     litellm_params:
-      model: nvidia_nim/${NEMO_MODEL}
+      model: nvidia_nim/qwen/qwen3.5-397b-a17b
       api_key: ${NVIDIA_API_KEY}
       max_tokens: ${NEMO_MAX_TOKENS}
   - model_name: claude-haiku-4-5-20251001
     litellm_params:
-      model: nvidia_nim/${NEMO_MODEL}
+      model: nvidia_nim/minimaxai/minimax-m2.5
       api_key: ${NVIDIA_API_KEY}
       max_tokens: ${NEMO_MAX_TOKENS}
 YAML
@@ -225,32 +225,38 @@ export ANTHROPIC_BASE_URL="http://127.0.0.1:4000" ANTHROPIC_API_KEY="nemo-code-l
 export CLAUDE_CONFIG_DIR="$NEMO_DIR/.claude-config"
 mkdir -p "$CLAUDE_CONFIG_DIR"
 cat > "$CLAUDE_CONFIG_DIR/.claude.json" << 'CJSON'
-{"hasCompletedOnboarding":true,"theme":"dark","customApiKeyResponses":{"approved":true},"bypassPermissionsModeAccepted":true}
+{"hasCompletedOnboarding":true,"theme":"dark","customApiKeyResponses":{"approved":true}}
 CJSON
-case "$NEMO_MODEL" in
-    moonshotai/kimi-k2.5) FM="Kimi K2.5 (Moonshot AI)";; z-ai/glm5) FM="GLM-5 (ZhipuAI)";;
-    nvidia/nemotron-3-super-120b-a12b) FM="Nemotron 3 Super 120B (NVIDIA)";; minimaxai/minimax-m2.5) FM="MiniMax M2.5";;
-    qwen/qwen3.5-397b-a17b) FM="Qwen 3.5 397B (Alibaba)";; openai/gpt-oss-120b) FM="GPT-OSS 120B (OpenAI)";; *) FM="$NEMO_MODEL";;
-esac
-cat > "$NEMO_DIR/CLAUDE.md" << IDENTITY
+cat > "$NEMO_DIR/CLAUDE.md" << 'IDENTITY'
 # Nemo Code Agent
-You are **Nemo** — a free AI coding agent powered by ${FM}, running inside Nemo Code (by ClawdWorks).
-You are NOT Claude. You are Nemo. Your brain is ${FM} via NVIDIA's free NIM API. You cost \$0 — completely free.
+You are **Nemo** — a free AI coding agent running inside Nemo Code (by ClawdWorks).
+You are NOT Claude. You are Nemo. You run on NVIDIA's free NIM API. You cost $0 — completely free.
+
+## Your Models (switch mid-session with /model)
+- **Sonnet** = Kimi K2.5 (Moonshot AI) — top coding model, default
+- **Opus** = Qwen 3.5 397B (Alibaba) — biggest brain, massive MoE
+- **Haiku** = MiniMax M2.5 — fastest responses
+
+All three are free via NVIDIA NIM. Users can type /model in the TUI to switch anytime.
+
 ## When asked "how much do you cost?" or "are you free?"
-Say: "I'm 100% free. I run ${FM} through NVIDIA's free API tier. No subscription, no credit card."
+Say: "I'm 100% free. All 3 models run through NVIDIA's free API tier. No subscription, no credit card. Type /model to switch between Kimi K2.5, Qwen 3.5, and MiniMax M2.5."
+
 ## Key Facts
-- **Model**: ${FM} (via NVIDIA NIM free tier)
-- **Cost**: \$0. Free. Always.
-- **Made by**: ClawdWorks
+- **Cost**: $0. Free. Always. All models.
+- **Made by**: ClawdWorks (Kevin Clawson + Claude)
 - **Open source**: github.com/kevdogg102396-afk/nemo-code
+- **Framework**: Claude Code CLI (Apache 2.0)
+
 ## Rules
 - Be direct, casual, no corporate tone
+- If you don't know something, say so — never make stuff up
 - You ARE Nemo, not Claude. Own it.
 IDENTITY
-echo ""; echo -e "\033[1;33m  CLAWD WORKS\033[0m | \033[0;36mnemo-code\033[0m | \033[0;36m${FM}\033[0m"; echo ""
+echo ""; echo -e "\033[1;33m  CLAWD WORKS\033[0m | \033[0;36mnemo-code\033[0m | \033[0;36mKimi K2.5 | Qwen 3.5 | MiniMax M2.5\033[0m"; echo ""
 CLAUDE_CMD="claude"
 command -v winpty &> /dev/null && [ -n "$MSYSTEM" ] && CLAUDE_CMD="winpty claude"
-$CLAUDE_CMD --model sonnet --dangerously-skip-permissions --system-prompt-file "$NEMO_DIR/CLAUDE.md" "$@"
+$CLAUDE_CMD --model sonnet --system-prompt-file "$NEMO_DIR/CLAUDE.md" "$@"
 '@
 [IO.File]::WriteAllText("$NemoDir\nemo-code", $bashLauncher, $Utf8NoBom)
 Write-Host "  ok Bash launcher (Git Bash)" -ForegroundColor Green
@@ -259,7 +265,7 @@ Write-Host "  ok Bash launcher (Git Bash)" -ForegroundColor Green
 $binDir = "$env:USERPROFILE\.local\bin"
 New-Item -ItemType Directory -Path $binDir -Force | Out-Null
 
-$cmdContent = "@echo off`r`npowershell -NoProfile -ExecutionPolicy Bypass -File `"%USERPROFILE%\.nemo-code\nemo-code.ps1`" %*"
+$cmdContent = "@echo off`r`n`"C:\Program Files\Git\bin\bash.exe`" `"%USERPROFILE%\.nemo-code\nemo-code`" %*"
 [IO.File]::WriteAllText("$binDir\clawdworks.cmd", $cmdContent, $Utf8NoBom)
 Write-Host "  ok clawdworks.cmd" -ForegroundColor Green
 

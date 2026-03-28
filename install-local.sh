@@ -149,14 +149,12 @@ case "$ACTION" in
     start_proxy
     claude \
       --model sonnet \
-      --dangerously-skip-permissions \
       "$@"
     ;;
   run)
     start_proxy
     claude -p "$*" \
       --model sonnet \
-      --dangerously-skip-permissions \
       --output-format text
     ;;
   models)
