@@ -59,8 +59,7 @@ if [ -n "$NVIDIA_API_KEY" ]; then
     echo -e "  ${DIM}Key: ...${NVIDIA_API_KEY: -8}${RESET}"
     echo ""
     echo -n "  Use this key? [Y/n]: "
-    read -r USE_EXISTING
-    if [[ "$USE_EXISTING" =~ ^[Nn] ]]; then
+    read -r USE_EXISTING < /dev/tty    if [[ "$USE_EXISTING" =~ ^[Nn] ]]; then
         NVIDIA_API_KEY=""
     fi
 fi
@@ -72,7 +71,7 @@ if [ -z "$NVIDIA_API_KEY" ]; then
     echo -e "  ${DIM}It's free — no credit card. Sign up, generate a key, paste it here.${RESET}"
     echo ""
     echo -n "  Paste your NVIDIA API key: "
-    read -r NVIDIA_API_KEY
+    read -r NVIDIA_API_KEY < /dev/tty
     echo ""
 
     if [ -z "$NVIDIA_API_KEY" ]; then
@@ -83,7 +82,7 @@ if [ -z "$NVIDIA_API_KEY" ]; then
     if [[ ! "$NVIDIA_API_KEY" =~ ^nvapi- ]]; then
         echo -e "  ${RED}Warning:${RESET} Key doesn't start with nvapi- — might not be valid"
         echo -n "  Continue anyway? [y/N]: "
-        read -r CONTINUE
+        read -r CONTINUE < /dev/tty
         if [[ ! "$CONTINUE" =~ ^[Yy] ]]; then
             exit 1
         fi
@@ -109,10 +108,9 @@ echo -e "    ${CYAN}5)${RESET} Qwen 3.5 397B        ${DIM}— Alibaba, massive M
 echo -e "    ${CYAN}6)${RESET} GPT-OSS 120B         ${DIM}— OpenAI open-source${RESET}"
 echo ""
 echo -n "  Choose [1]: "
-read -r MODEL_CHOICE
+read -r MODEL_CHOICE < /dev/tty
 
-case "${MODEL_CHOICE:-1}" in
-    1) NEMO_MODEL="moonshotai/kimi-k2.5" ;;
+case "${MODEL_CHOICE:-1}" in    1) NEMO_MODEL="moonshotai/kimi-k2.5" ;;
     2) NEMO_MODEL="z-ai/glm5" ;;
     3) NEMO_MODEL="nvidia/nemotron-3-super-120b-a12b" ;;
     4) NEMO_MODEL="minimaxai/minimax-m2.5" ;;
@@ -148,10 +146,9 @@ if [ "$HAS_DOCKER" = false ]; then
 fi
 
 echo -n "  Choose [1]: "
-read -r INSTALL_MODE
+read -r INSTALL_MODE < /dev/tty
 
 echo ""
-
 # ─── Step 4: Install ─────────────────────────────────────────────────
 
 echo -e "${DIM}  ────────────────────────────────────────────────────────${RESET}"
